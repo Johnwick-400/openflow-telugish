@@ -1,0 +1,9 @@
+# Ignore large raw intermediate training audio & unquantized FP32/FP16 checkpoints
+data/wavs/
+data/real_svarah_raw/
+models/whisper-tiny-base/
+models/telugish-whisper-tiny-ft/
+models/tmp_wise_*/
+__pycache__/
+*.pyc
+.venv/
