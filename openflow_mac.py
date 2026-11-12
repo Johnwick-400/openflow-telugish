@@ -31,7 +31,12 @@ from typing import Optional
 from faster_whisper import WhisperModel
 
 BASE_DIR = Path(__file__).resolve().parent
-DEFAULT_MODEL_DIR = BASE_DIR / "models" / "telugish-whisper-tiny-int8"
+sys.path.insert(0, str(BASE_DIR / "scripts"))
+from build_vasista_int8_engine import telugish_postprocess
+VASISTA_SMALL_DIR = BASE_DIR / "models" / "vasista-telugu-small-int8"
+SMALL_MODEL_DIR = BASE_DIR / "models" / "telugish-whisper-small-int8"
+TINY_MODEL_DIR = BASE_DIR / "models" / "telugish-whisper-tiny-int8"
+DEFAULT_MODEL_DIR = VASISTA_SMALL_DIR if VASISTA_SMALL_DIR.exists() else (SMALL_MODEL_DIR if SMALL_MODEL_DIR.exists() else TINY_MODEL_DIR)
 SAMPLES_DIR = BASE_DIR / "samples"
 
 
@@ -40,8 +45,10 @@ class OpenFlowEngine:
         if not Path(model_dir).exists():
             raise FileNotFoundError(
                 f"INT8 model directory not found at {model_dir}.\n"
-                "Make sure 'models/telugish-whisper-tiny-int8' is extracted."
+                "Make sure 'models/telugish-whisper-small-int8' or 'models/telugish-whisper-tiny-int8' is extracted."
             )
+        self.model_name = Path(model_dir).name
+        size_mb = (Path(model_dir) / "model.bin").stat().st_size / (1024 * 1024)
         t0 = time.perf_counter()
         self.model = WhisperModel(
             model_dir,
@@ -50,24 +57,27 @@ class OpenFlowEngine:
             cpu_threads=cpu_threads,
         )
         self.load_ms = (time.perf_counter() - t0) * 1000.0
-        # Warmup pass
-        print(f"⚡ [OpenFlow-Telugish] Loaded 38.6 MB INT8 Engine on CPU in {self.load_ms:.1f} ms")
+        print(f"⚡ [OpenFlow-Telugish] Loaded {self.model_name} ({size_mb:.1f} MB INT8) on CPU in {self.load_ms:.1f} ms")
 
-    def transcribe(self, audio_path: str) -> dict:
+    def transcribe(self, audio_path: str, use_vad: bool = False) -> dict:
         t0 = time.perf_counter()
+        is_vasista = "vasista" in self.model_name
         segments, info = self.model.transcribe(
             audio_path,
-            language="en",
+            language="te" if is_vasista else "en",
             beam_size=1,
             without_timestamps=True,
-            vad_filter=False,
+            vad_filter=use_vad,
+            vad_parameters=dict(min_silence_duration_ms=350) if use_vad else None,
         )
-        text = " ".join(s.text.strip() for s in segments).strip()
+        raw_text = " ".join(s.text.strip() for s in segments).strip()
+        text = telugish_postprocess(raw_text) if is_vasista else raw_text
         latency_ms = (time.perf_counter() - t0) * 1000.0
         dur = max(float(info.duration), 1e-4)
         rtf = (latency_ms / 1000.0) / dur
         return {
             "text": text,
+            "telugu_script": raw_text if is_vasista else "",
             "duration_sec": round(dur, 2),
             "latency_ms": round(latency_ms, 1),
             "rtf": round(rtf, 4),
@@ -191,7 +201,7 @@ def run_ptt_loop(engine: OpenFlowEngine, auto_paste: bool = False) -> None:
             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
                 tmp_wav = tmp.name
             record_mic_ffmpeg(tmp_wav)
-            res = engine.transcribe(tmp_wav)
+            res = engine.transcribe(tmp_wav, use_vad=True)
             os.remove(tmp_wav)
             print(f"\n✨ [{res['latency_ms']} ms | {res['speedup']}x RT]: {res['text']}\n")
             copy_and_paste_mac(res["text"], auto_paste=auto_paste)

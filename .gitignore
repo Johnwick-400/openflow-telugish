@@ -1,9 +1,28 @@
-# Ignore large raw intermediate training audio & unquantized FP32/FP16 checkpoints
-data/wavs/
-data/real_svarah_raw/
+# Ignore raw datasets and >100MB checkpoints (GitHub enforces a 100MB file limit)
+data/
 models/whisper-tiny-base/
+models/whisper-small-base/
 models/telugish-whisper-tiny-ft/
-models/tmp_wise_*/
+models/telugish-whisper-small-ft/
+models/telugish-whisper-small-wise/
+models/telugish-whisper-small-int8/
+models/vasista-telugu-small-hf/
+models/vasista-telugu-small-int8/
+models/openflow-hybrid-base-int8/
+models/tmp_*/
+models/_tmp_*/
+
+# Ignore temporary scratch scripts
+check_*.py
+inspect_*.py
+filter_svarah.py
+test_hf_*.py
+test_sources.py
+scripts/check_*.py
+scripts/inspect_*.py
+scripts/test_*.py
+scripts/fix_max_length_and_test.py
+
 __pycache__/
 *.pyc
 .venv/
