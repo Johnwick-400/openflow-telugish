@@ -1,54 +1,54 @@
-# ⚡ OpenFlow-Telugish
+# OpenFlow-Telugish
 
-**An Open-Source, 100% Offline Wispr Flow Alternative & Edge Speech-to-Text Engine for Code-Switched Telugu-English ("Telugish") and Indian-Accented English.**
+**An Open-Source, 100% Offline Wispr Flow Alternative and Edge Speech-to-Text Engine for Code-Switched Telugu-English ("Telugish") and Indian-Accented English.**
 
 ![Benchmark Overview](benchmarks/linkedin_benchmark_chart.png)
 
 ---
 
-## 🎯 The Problem We Solved
+## Overview and Problem Statement
 
-Voice dictation apps like **Wispr Flow ($15/month)** require cloud internet and fail when Telugu developers, doctors, or users naturally speak **Code-Switched "Telugish"** (mixing Telugu grammar with English tech/finance/daily words) into a microphone:
+Voice dictation tools such as **Wispr Flow ($15/month)** require cloud connectivity and fail when Telugu developers, clinicians, or users naturally speak **Code-Switched "Telugish"** (mixing Telugu grammar with English technical, financial, or everyday vocabulary) into a microphone:
 * *"Hello mama idi chala late ayipoyindi, tharvatha phone chesthanu, nenu office lo kuda baga late ayindi anduke."*
 * *"Ee roju aa task ayipoyi urgent ga deploy chesaka Cloud Run logs check chesi GCP logging chusi naku cheppu."*
 * *"Miru feature develop chesi ready ga undandi, na mobile nundi nenu aa PRs accept chesthanu."*
 
-Meanwhile:
-1. **Standard `openai/whisper-tiny` & `whisper-small`** suffer a **`65.6% – 72.8%` Word Error Rate (WER)** on Telugish—hallucinating English homophones or non-Telugu scripts.
-2. **Existing Telugu ASR models (`vasista22/whisper-telugu`)** only output literary Telugu script (`తెలుగు`), mangle English tech phrases (*"Yes today to work"* $\rightarrow$ `"రేట్ డే"`), and truncate recordings longer than 8 seconds due to Telugu Unicode BPE token expansion.
+Existing open-source models fall short in two ways:
+1. **Standard `openai/whisper-tiny` and `whisper-small`** suffer a **`65.6% – 72.8%` Word Error Rate (WER)** on spoken Telugish, hallucinating English homophones or non-Telugu scripts.
+2. **Existing Telugu ASR models (`vasista22/whisper-telugu`)** output literary Telugu script (`తెలుగు`), misinterpret English technical phrases (*"Yes today to work"* -> `"రేట్ డే"`), and truncate recordings longer than 8 seconds due to Telugu Unicode BPE token expansion.
 
 ---
 
-## 🏗️ Dual-Architecture Engineering (Method 1 & Method 2)
+## Dual-Architecture Engineering
 
-We engineered, trained, and benchmarked **two complementary architectures** on an **NVIDIA L4 GPU (`bf16` mixed precision)** and quantized them to **CTranslate2 INT8** for offline CPU & mobile execution:
+We engineered, trained, and benchmarked **two complementary architectures** on an **NVIDIA L4 GPU (`bf16` mixed precision)** and quantized them to **CTranslate2 INT8** for offline CPU and mobile execution:
 
-### ⚡ Architecture A (Method 2 — Production Default): Two-Step Hybrid `WiSE-FT` Engine (`~90–93%` Live Mic Accuracy)
+### Architecture A (Production Default): Two-Step Hybrid `WiSE-FT` Engine (`~90–93%` Live Mic Accuracy)
 ```text
-[92% Vasista 1,000-Hr Telugu Brain] + [8% OpenAI / Fine-Tuned English Brain]
-                                 │
-                                 ▼  (1. Weight-Space Ensembling / WiSE-FT)
+[92% Vasista 1,000-Hr Telugu Weights] + [8% OpenAI / Fine-Tuned English Weights]
+                                 |
+                                 v  (1. Weight-Space Ensembling / WiSE-FT)
               [Bilingual Acoustic + Phonetic Decoder]
-                                 │
-                                 ▼  (2. CTranslate2 INT8 Quantization — 3.8x Smaller)
+                                 |
+                                 v  (2. CTranslate2 INT8 Quantization — 3.8x Smaller)
         [37.1 MB (Tiny) / 70.8 MB (Base) / 233.3 MB (Small)]
-                                 │
-                                 ▼  (3. Smart Pause-Valley Chunker + Phonetic-to-Roman Transducer)
-  🇮🇳 Telugu Script : "హలో మామ ఇది చాలా లేట్ అయిపోయింది తర్వాత ఫోన్ చేస్తాను..."
-  🔤 Roman Telugish: "Hello mama idi chala late ayipoyindi tharvatha phone chesthanu..."
+                                 |
+                                 v  (3. Smart Pause-Valley Chunker + Phonetic-to-Roman Transducer)
+  Telugu Script  : "హలో మామ ఇది చాలా లేట్ అయిపోయింది తర్వాత ఫోన్ చేస్తాను..."
+  Roman Telugish : "Hello mama idi chala late ayipoyindi tharvatha phone chesthanu..."
 ```
 
-### 🧠 Architecture B (Method 1 — Pure Neural E2E): Direct-to-Roman Fine-Tuned Whisper (`94.3%` Character Accuracy on Benchmark)
-* Curated **9.78 hours (`4,317` utterances)** combining **3,120 real human microphone recordings** (**Google FLEURS `te_in`**, **OpenSLR SLR66**, **IIIT-B / Chai Bisket YouTube**, **AI4Bharat `Svarah`**) + **1,197 multi-condition Code-Switched Telugish clips** (Clean, Ambient Noise, Room Reverb, 8kHz Telephony Bandpass).
+### Architecture B (Pure Neural End-to-End): Direct-to-Roman Fine-Tuned Whisper (`94.3%` Character Accuracy on Benchmark)
+* Curated **9.78 hours (`4,317` utterances)** combining **3,120 real human microphone recordings** (**Google FLEURS `te_in`**, **OpenSLR SLR66**, **IIIT-B / Chai Bisket YouTube**, **AI4Bharat `Svarah`**) and **1,197 multi-condition Code-Switched Telugish clips** (Clean, Ambient Noise, Room Reverb, 8kHz Telephony Bandpass).
 * Fine-tuned `whisper-tiny` (`38.6 MB` INT8) and `whisper-small` (`236.7 MB` INT8) end-to-end on an NVIDIA L4 GPU to emit Romanized Telugish directly from the neural decoder with zero post-processing rules.
 
 ---
 
-## 📊 Verified Benchmark Results
+## Verified Benchmark Results
 
-### 1. Held-Out Benchmark Performance (`120` Real-Human + Code-Switched Clips & `82` 5-Domain Tech/FinTech/Medical Clips)
+### 1. Held-Out Benchmark Performance (`120` Real-Human + Code-Switched Clips and `82` 5-Domain Tech/FinTech/Medical Clips)
 
-| Model / Tier | INT8 Size | Device | 82-Clip Tech/Domain WER ↓ | 82-Clip Char Accuracy ↑ | 120-Clip Real-Human WER ↓ | 120-Clip Char Accuracy ↑ | CPU Speed |
+| Model / Tier | INT8 Size | Device | 82-Clip Tech/Domain WER | 82-Clip Char Accuracy | 120-Clip Real-Human WER | 120-Clip Char Accuracy | CPU Speed |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Base `openai/whisper-tiny`** | 147.8 MB (FP16) | GPU | `65.63%` | `64.25%` | — | — | — |
 | **Base `openai/whisper-small`** | 464.9 MB (FP16) | GPU | — | — | `72.84%` | `57.66%` | — |
@@ -66,7 +66,7 @@ We engineered, trained, and benchmarked **two complementary architectures** on a
 
 ---
 
-## 🚀 Quickstart (Run in 30 Seconds on MacBook / Linux)
+## Quickstart (MacBook and Linux)
 
 ### 1. Install Dependencies
 ```bash
@@ -76,7 +76,7 @@ pip install faster-whisper ctranslate2 transformers torch sounddevice soundfile 
 ```
 
 ### 2. Run Live Microphone Push-to-Talk (`test_telugish_mic.py`)
-*(On first run on Mac, it automatically builds & caches the 233 MB INT8 Hybrid WiSE-FT model in `./models/vasista-telugu-small-int8`, records from your mic, outputs both Telugu script & Roman Telugish, and copies to your Mac clipboard!)*
+*(On first run, the script automatically builds and caches the 233 MB INT8 Hybrid WiSE-FT model in `./models/vasista-telugu-small-int8`, records from your microphone, outputs both Telugu script and Roman Telugish, and copies the transcript to your clipboard.)*
 ```bash
 python3 test_telugish_mic.py
 ```
@@ -93,14 +93,14 @@ python3 openflow_mac.py --model-dir models/telugish-whisper-tiny-int8 --demo
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 
 ```text
 openflow-telugish/
-├── README.md                          # Architecture, benchmarks & quickstart
-├── test_telugish_mic.py               # Standalone Mac/Linux Push-to-Talk & Smart-Chunked Hybrid CLI
-├── openflow_mac.py                    # Desktop dictation & 4-domain benchmark demo runner
-├── infer_edge.py                      # 1-line CLI for ultra-fast CPU inference
+├── README.md                          # Architecture, benchmarks, and quickstart
+├── test_telugish_mic.py               # Standalone Mac/Linux Push-to-Talk and Smart-Chunked Hybrid CLI
+├── openflow_mac.py                    # Desktop dictation and 4-domain benchmark demo runner
+├── infer_edge.py                      # Single-line CLI for offline CPU inference
 ├── requirements.txt                   # Lightweight runtime dependencies
 ├── models/
 │   ├── openflow-hybrid-tiny-int8/     # 37.1 MB Mobile Hybrid INT8 model (bundled in repo)
@@ -108,19 +108,19 @@ openflow-telugish/
 ├── scripts/
 │   ├── train_whisper.py               # Mixed-precision (bf16) L4 GPU trainer + SpecAugment
 │   ├── build_vasista_int8_engine.py   # Hybrid WiSE-FT (92% Vasista + 8% OpenAI) + INT8 builder
-│   ├── build_mobile_hybrid_models.py  # Mobile Tiny (37MB) & Base (71MB) INT8 builder
+│   ├── build_mobile_hybrid_models.py  # Mobile Tiny (37MB) and Base (71MB) INT8 builder
 │   ├── build_5k_e2e_roman_dataset.py  # 9.78-hour (4,317-clip) real-human + code-switched dataset builder
-│   ├── fetch_youtube_and_openslr.py   # Chai Bisket YouTube & OpenSLR SLR66 curator
-│   ├── build_real_human_v2.py         # Google FLEURS (te_in) & AI4Bharat Svarah curator + Romanizer
+│   ├── fetch_youtube_and_openslr.py   # Chai Bisket YouTube and OpenSLR SLR66 curator
+│   ├── build_real_human_v2.py         # Google FLEURS (te_in) and AI4Bharat Svarah curator + Romanizer
 │   ├── wise_ft_optimize.py            # Weight-Space Ensembling optimizer
 │   ├── evaluate_model.py              # Multi-domain WER/CER/RTF evaluator
 │   └── export_edge_int8.py            # CTranslate2 INT8 converter
-├── benchmarks/                        # Full JSON evaluation reports, training logs & charts
+├── benchmarks/                        # Full JSON evaluation reports, training logs, and charts
 └── samples/                           # 6 held-out test WAVs (Tech, Food, Medical, FLEURS, YouTube)
 ```
 
 ---
 
-## 👤 Author
+## Author
 **Parasuram Pavan Teja Veesam**  
-AI/ML Engineer @ HiringHood | [LinkedIn](https://www.linkedin.com/in/pavantejveesam) | [GitHub](https://github.com/Johnwick-400) | [Portfolio](https://johnwick-400.github.io)
+AI/ML Engineer at HiringHood | [LinkedIn](https://www.linkedin.com/in/pavantejveesam) | [GitHub](https://github.com/Johnwick-400) | [Portfolio](https://johnwick-400.github.io)
