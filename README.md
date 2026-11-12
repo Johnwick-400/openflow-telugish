@@ -21,7 +21,7 @@ Existing open-source models fall short in two ways:
 
 ## Dual-Architecture Engineering
 
-We engineered, trained, and benchmarked **two complementary architectures** on an **NVIDIA L4 GPU (`bf16` mixed precision)** and quantized them to **CTranslate2 INT8** for offline CPU and mobile execution:
+We engineered, trained, and benchmarked **two complementary architectures** on an **CUDA GPU (`bf16` mixed precision)** and quantized them to **CTranslate2 INT8** for offline CPU and mobile execution:
 
 ### Architecture A (Production Default): Two-Step Hybrid `WiSE-FT` Engine (`~90–93%` Live Mic Accuracy)
 ```text
@@ -40,7 +40,7 @@ We engineered, trained, and benchmarked **two complementary architectures** on a
 
 ### Architecture B (Pure Neural End-to-End): Direct-to-Roman Fine-Tuned Whisper (`94.3%` Character Accuracy on Benchmark)
 * Curated **9.78 hours (`4,317` utterances)** combining **3,120 real human microphone recordings** (**Google FLEURS `te_in`**, **OpenSLR SLR66**, **IIIT-B / Chai Bisket YouTube**, **AI4Bharat `Svarah`**) and **1,197 multi-condition Code-Switched Telugish clips** (Clean, Ambient Noise, Room Reverb, 8kHz Telephony Bandpass).
-* Fine-tuned `whisper-tiny` (`38.6 MB` INT8) and `whisper-small` (`236.7 MB` INT8) end-to-end on an NVIDIA L4 GPU to emit Romanized Telugish directly from the neural decoder with zero post-processing rules.
+* Fine-tuned `whisper-tiny` (`38.6 MB` INT8) and `whisper-small` (`236.7 MB` INT8) end-to-end on an CUDA GPU to emit Romanized Telugish directly from the neural decoder with zero post-processing rules.
 
 ---
 
@@ -106,7 +106,7 @@ openflow-telugish/
 │   ├── openflow-hybrid-tiny-int8/     # 37.1 MB Mobile Hybrid INT8 model (bundled in repo)
 │   └── telugish-whisper-tiny-int8/    # 38.6 MB Mobile E2E Roman INT8 model (bundled in repo)
 ├── scripts/
-│   ├── train_whisper.py               # Mixed-precision (bf16) L4 GPU trainer + SpecAugment
+│   ├── train_whisper.py               # Mixed-precision (bf16) CUDA GPU trainer + SpecAugment
 │   ├── build_vasista_int8_engine.py   # Hybrid WiSE-FT (92% Vasista + 8% OpenAI) + INT8 builder
 │   ├── build_mobile_hybrid_models.py  # Mobile Tiny (37MB) and Base (71MB) INT8 builder
 │   ├── build_5k_e2e_roman_dataset.py  # 9.78-hour (4,317-clip) real-human + code-switched dataset builder

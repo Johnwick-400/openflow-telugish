@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Fine-tune openai/whisper-tiny on Telugish & Indian-accented English (data/train.jsonl)
-and evaluate on data/eval.jsonl after each epoch using PyTorch + CUDA mixed precision (fp16/bf16) on L4 GPU.
+and evaluate on data/eval.jsonl after each epoch using PyTorch + CUDA mixed precision (fp16/bf16) on CUDA GPU.
 
 Features:
 - Configurable learning rate, linear/cosine warmup, weight decay, gradient accumulation, and SpecAugment
@@ -545,7 +545,7 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default="bf16",
         choices=["fp16", "bf16", "fp32"],
-        help="Mixed precision mode on CUDA (default: bf16 on L4 GPU)",
+        help="Mixed precision mode on CUDA (default: bf16 on CUDA GPU)",
     )
     parser.add_argument(
         "--spec-augment",

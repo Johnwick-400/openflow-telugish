@@ -5,7 +5,7 @@ Round 5 Perfection Pass:
    (GPay, PhonePe, Blinkit, Hugging Face, KMC Manipal, Vande Bharat, Vijayawada) and
    unseen Telugu conversational words (pakkana, konukko, lopala, repati, ventane, kattu,
    avvakapothe, pothundi, marchipothe, cheskovachu) — strictly zero sentence overlap with eval.jsonl.
-2. Fine-tunes on L4 GPU + applies WiSE-FT weight-space ensembling.
+2. Fine-tunes on CUDA GPU + applies WiSE-FT weight-space ensembling.
 3. Adds Whisper domain hotword prompt conditioning + standard compound-word normalization
    (e.g. 'screen shot' -> 'screenshot', 'cut off' -> 'cutoff', 'mid night' -> 'midnight')
    and exports the updated 38.6 MB INT8 Edge model.

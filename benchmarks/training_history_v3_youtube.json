@@ -32,7 +32,7 @@
     "run_final_eval_report": true
   },
   "device": "cuda",
-  "gpu_name": "NVIDIA L4",
+  "gpu_name": "CUDA GPU",
   "train_samples": 1581,
   "eval_samples": 165,
   "total_opt_steps": 198,

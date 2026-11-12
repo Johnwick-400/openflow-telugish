@@ -43,7 +43,7 @@ DEVOPS_OFFICE_SENTENCES = [
     "Morning standup meeting ki five minutes late avthundi, nenu cab lo unnanu office ki reach avvagane join avtha.",
     "Backend API response time chala slow ga undi database query optimize chesi malli test chedham.",
     "Docker image build chesi GCP Artifact Registry lo push chesanu, ippudu Cloud Run service update cheyali.",
-    "Model training L4 GPU meedha run avthundi, validation accuracy check chesi best checkpoint save chey.",
+    "Model training CUDA GPU meedha run avthundi, validation accuracy check chesi best checkpoint save chey.",
     "Client call ten thirty ki start avthundi, presentation deck inka demo video ready ga pettuko.",
     "Ninna night deployment lo chinna bug vachindi, hotfix vesi production lo redeploy chesamu.",
     "Ee weekend ooriki velthunna kabatti Friday evening lopala pending tasks anni close cheyali.",
