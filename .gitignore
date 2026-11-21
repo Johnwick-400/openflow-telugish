@@ -1,0 +1,35 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+.venv/
+venv/
+ENV/
+
+# Model checkpoints (larger than 100MB)
+models/
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.zip
+*.upload
+
+# Audio raw dumps
+*.wav
+*.mp3
+*.ogg
+*.m4a
+*.webm
+data/wavs/
+data/fleurs_te/
+data/openslr_real_te/
+
+# OS and IDE files
+.DS_Store
+.idea/
+.vscode/
+*.log
